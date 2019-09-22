@@ -21,12 +21,19 @@ export class GameComponent implements OnInit {
   desY;
   isMarioMoving = false;
   coordinatesArray = [];
+  sortedPathArray = [];
+  gameInteval;
+  stepsMoved;
   ngOnInit() {
-    let row = '10';
-    // do{
-    //   row = prompt("Enter a number between 5 and 10");
-    // }
-    //   while(row == null || row == "" || isNaN(parseInt(row)) || parseInt(row) > 10 || parseInt(row) < 5);
+    this.initialize();
+  }
+
+  initialize() {
+    let row = '';
+    do {
+      row = prompt("Enter matrix dimensions for nxn matrix between 5 and 20");
+    }
+    while (row == null || row == "" || isNaN(parseInt(row)) || parseInt(row) > 20 || parseInt(row) < 5);
     this.row = row;
     this.column = this.row;
     this.width = 500 / this.column;
@@ -34,47 +41,44 @@ export class GameComponent implements OnInit {
     this.generateGrid(this.row, this.column);
     this.corX = this.row % 2 == 0 ? Math.floor(this.row / 2) - 1 : Math.floor(this.row / 2);
     this.corY = this.corX;
-    this.coordinatesArray.push({ x: 0, y: 0 });
-    this.coordinatesArray.push({ x: 4, y: 3 });
-    this.coordinatesArray.push({ x: this.column-1, y: this.row-1 });
     this.moveToPositions();
-    // this.startGame();
-
-
+    this.setPath();
+    this.stepsMoved = 0;
+    this.startGame();
   }
 
 
   eatRed() {
-    if(this.grid[this.corY][this.corX] == 1) {
+    if (this.grid[this.corY][this.corX] == 1) {
       this.grid[this.corY][this.corX] = 0;
     }
   }
- 
+
 
   shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
-  
+
     // While there remain elements to shuffle...
     while (0 !== currentIndex) {
-  
+
       // Pick a remaining element...
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex -= 1;
-  
+
       // And swap it with the current element.
       temporaryValue = array[currentIndex];
       array[currentIndex] = array[randomIndex];
       array[randomIndex] = temporaryValue;
     }
-  
+
     return array;
   }
 
 
   generateGrid(rows, columns) {
     let arr = [];
-    for(let i = 0; i < rows*columns; i++){
-      if(i<rows){
+    for (let i = 0; i < rows * columns; i++) {
+      if (i < rows) {
         arr.push(1);
       }
       else {
@@ -117,16 +121,21 @@ export class GameComponent implements OnInit {
   moveMario() {
     if (this.velX == -1 && this.velY == 0) {
       this.moveMarioleft();
+      this.stepsMoved++;
     }
     if (this.velX == 0 && this.velY == -1) {
       this.moveMarioUp();
+      this.stepsMoved++;
     }
     if (this.velX == 0 && this.velY == 1) {
       this.moveMarioDown();
+      this.stepsMoved++;
     }
     if (this.velX == 1 && this.velY == 0) {
       this.moveMarioRight();
+      this.stepsMoved++;
     }
+
     this.eatRed();
     this.checkState();
   }
@@ -144,6 +153,9 @@ export class GameComponent implements OnInit {
       this.velX = 0;
       this.velY = 0;
       this.isMarioMoving = false;
+      if (this.coordinatesArray.length <= 0) {
+        this.endGame();
+      }
     }
     else {
       this.isMarioMoving = true;
@@ -172,21 +184,61 @@ export class GameComponent implements OnInit {
   }
 
   startGame() {
-    setInterval(() => {
+    this.gameInteval = setInterval(() => {
       this.moveMario();
     }, 500);
+  }
+  endGame() {
+    clearInterval(this.gameInteval);
   }
 
 
   moveToPositions() {
-    let i = 0;
-    setInterval(() => {
+    let interval = setInterval(() => {
       if (!this.isMarioMoving) {
-        if (this.coordinatesArray[i]) {
-          this.goToCoordinates(this.coordinatesArray[i].x, this.coordinatesArray[i].y);
-          i++;
+        if (this.coordinatesArray[0]) {
+          this.goToCoordinates(this.coordinatesArray[0].x, this.coordinatesArray[0].y);
+          this.coordinatesArray.shift();
+          if (this.coordinatesArray.length < 0) {
+            clearInterval(interval);
+          }
         }
       }
     }, 500);
+  }
+
+  sortPathArray() {
+    this.sortedPathArray = [];
+    for (let i = 0; i < this.row; i++) {
+      for (let j = 0; j < this.column; j++) {
+        if (this.grid[i][j] == 1) {
+          let distance = (this.corX - j >= 0 ? this.corX - j : j - this.corX) + (this.corY - i >= 0 ? this.corY - i : i - this.corY);
+          this.sortedPathArray.push({ x: j, y: i, d: distance });
+        }
+      }
+    }
+    this.sortedPathArray.sort((a, b) => {
+      return a.d - b.d;
+    });
+  }
+
+  setPath() {
+    this.sortPathArray();
+    while (this.sortedPathArray.length > 0) {
+      let x = this.sortedPathArray[0].x;
+      let y = this.sortedPathArray[0].y;
+      this.coordinatesArray.push({ x: x, y: y });
+      this.sortedPathArray.shift();
+      this.shiftDistance(x, y);
+    }
+  }
+
+  shiftDistance(x, y) {
+    this.sortedPathArray.map(item => {
+      item.d = (item.x - x >= 0 ? item.x - x : x - item.x) + (item.y - y >= 0 ? item.y - y : y - item.y);
+    });
+    this.sortedPathArray.sort((a, b) => {
+      return a.d - b.d;
+    });
   }
 }
