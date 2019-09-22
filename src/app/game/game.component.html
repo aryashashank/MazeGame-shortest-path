@@ -1,0 +1,12 @@
+<div class="container">
+    <div class="grid-wrapper">
+        <div class="grid-rows" [ngStyle]="{'height': height+'px'}" *ngFor="let row of grid; index as y;">
+            <div class="grid-box" [ngStyle]="{'width': width+'px', 'height': height+'px'}" *ngFor="let box of row;  index as x;">
+                <span class="reds"  *ngIf="box == 1 && !(x == corX && y== corY)"></span>
+                <span class="mario" *ngIf="x == corX && y == corY"></span>
+                <!-- <span>{{i+' '+j}}</span> -->
+
+            </div>
+        </div>
+    </div>
+</div>
