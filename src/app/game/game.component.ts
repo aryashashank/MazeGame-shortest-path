@@ -22,11 +22,11 @@ export class GameComponent implements OnInit {
   isMarioMoving = false;
   coordinatesArray = [];
   ngOnInit() {
-    let row = '20';
-    do{
-      row = prompt("Enter a number between 5 and 10");
-    }
-      while(row == null || row == "" || isNaN(parseInt(row)) || parseInt(row) > 10 || parseInt(row) < 5);
+    let row = '10';
+    // do{
+    //   row = prompt("Enter a number between 5 and 10");
+    // }
+    //   while(row == null || row == "" || isNaN(parseInt(row)) || parseInt(row) > 10 || parseInt(row) < 5);
     this.row = row;
     this.column = this.row;
     this.width = 500 / this.column;
@@ -38,7 +38,8 @@ export class GameComponent implements OnInit {
     this.coordinatesArray.push({ x: 4, y: 3 });
     this.coordinatesArray.push({ x: this.column-1, y: this.row-1 });
     this.moveToPositions();
-    this.startGame();
+    // this.startGame();
+
 
   }
 
@@ -48,29 +49,48 @@ export class GameComponent implements OnInit {
       this.grid[this.corY][this.corX] = 0;
     }
   }
+ 
+
+  shuffle(array) {
+    var currentIndex = array.length, temporaryValue, randomIndex;
+  
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+  
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+  
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+  
+    return array;
+  }
 
 
   generateGrid(rows, columns) {
+    let arr = [];
+    for(let i = 0; i < rows*columns; i++){
+      if(i<rows){
+        arr.push(1);
+      }
+      else {
+        arr.push(0);
+      }
+    }
+    arr = this.shuffle(arr);
     this.grid = [];
+    let arrIndex = 0;
     for (let rowi = 0; rowi < rows; rowi++) {
       let row = [];
       for (let i = 0; i < columns; i++) {
-        row.push(this.generate75());
+        row.push(arr[arrIndex++]);
       }
       this.grid.push(row);
     }
-  }
-
-  generate50() {
-    return Math.round(Math.random()) & 1;
-  }
-
-  generate75() {
-    let x;
-    x = this.generate50();
-    x = x << 1;
-    x = x ^ this.generate50();
-    return (x > 0) ? 0 : 1;
   }
 
   placeMario(x, y) {
