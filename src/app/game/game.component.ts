@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 
+import { of } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+
+
 @Component({
   selector: 'app-game',
   templateUrl: './game.component.html',
@@ -7,7 +12,19 @@ import { Component, OnInit } from '@angular/core';
 })
 export class GameComponent implements OnInit {
 
-  constructor() { }
+  constructor() {
+//    map((x:any)=> {
+//       return x*10;
+//     })(of(10, 20, 30))
+// .subscribe(
+//   next => console.log('next:', next),
+//   err => console.log('error:', err),
+//   () => console.log('the end')
+// );
+   }
+
+  
+
   grid = [];
   row;
   column;
@@ -24,6 +41,7 @@ export class GameComponent implements OnInit {
   sortedPathArray = [];
   gameInteval;
   stepsMoved;
+
   ngOnInit() {
     this.initialize();
   }
